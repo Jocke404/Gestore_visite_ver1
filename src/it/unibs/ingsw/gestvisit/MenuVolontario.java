@@ -4,7 +4,7 @@ import it.unibs.mylib.MyMenu;
 import java.time.LocalDate;
 
 public class MenuVolontario implements Menu {
-    private VisitManager visitManager = new VisitManager(); // Inizializza il VisitManager
+    private VisitManager visitManager =VisitManager.getInstance(); // Inizializza il VisitManager
     private static final String[] OPZIONI_VOLONTARIO = {
         "Visualizza visite assegnate",
         "Inserisci disponibilità"
@@ -25,7 +25,8 @@ public class MenuVolontario implements Menu {
                     //Logica per visualizzare le visite assegnate al volontario
                     visitManager.visualizzaVisiteVolontario();
                 } else if (chosed == 2) {
-                    
+                    //metti nel menu il richiamo per inserisciDisponibilitaVolontario
+                    visitManager.inserisciDisponibilitaVolontario();
                 } else if (chosed == 0) {
                     goOn = false;
                 }

@@ -30,12 +30,7 @@ public class VisitManager {
         return instance;
     }
 
-
-
-
-    
-
-    //Gestione Thread-------------------------------------------------------------------------
+     //Gestione Thread-------------------------------------------------------------------------
     public VisitManager() {
         // Sincronizza i dati iniziali dal database
         databaseUpdater.sincronizzaDalDatabase();
@@ -138,10 +133,14 @@ public class VisitManager {
         utilita.modificaDataVisita();
     }
 
+    
+
     // Metodo per aggiungere una nuova visita
     public void aggiungiVisita() {
         utilita.aggiungiVisita();
     }
+
+
 
     public void modificaStatoVisita() {
         utilita.modificaStatoVisita();

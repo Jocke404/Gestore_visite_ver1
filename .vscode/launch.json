@@ -7,6 +7,13 @@
             "name": "MainVisite",
             "request": "launch",
             "mainClass": "src.it.unibs.ingsw.gestvisit.MainVisite",
+            "projectName": "Gestore_visite_ver1_d918ee05"
+        },
+        {
+            "type": "java",
+            "name": "MainVisite",
+            "request": "launch",
+            "mainClass": "src.it.unibs.ingsw.gestvisit.MainVisite",
             "projectName": "Gestore_visite_ver1_6cbfa164"
         },
         {

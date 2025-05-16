@@ -3,8 +3,10 @@ package src.it.unibs.ingsw.gestvisit;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,7 +15,8 @@ import it.unibs.mylib.InputDati;
 public class Utilita {
 
     private final DatabaseUpdater databaseUpdater;
-   
+   private final Map<String, List<String>> disponibilitaVolontari = new ConcurrentHashMap<>();
+
 
     public Utilita(DatabaseUpdater databaseUpdater) {
         this.databaseUpdater = databaseUpdater;
@@ -401,6 +404,79 @@ public class Utilita {
             }
         }
     }
+
+   public void inserisciDisponibilitaVolontario(Volontario volontario) {
+    LocalDate oggi = LocalDate.now();
+    int giornoCorrente = oggi.getDayOfMonth();
+
+    // Permetti solo tra il 1 e il 15 del mese
+    //if (giornoCorrente < 1 || giornoCorrente > 15) {
+       // System.out.println("Puoi inserire la disponibilità solo tra il 1 e il 15 del mese precedente a quello di interesse.");
+        //return;
+    //}
+
+    LocalDate meseProssimo = oggi.plusMonths(1);
+    YearMonth ym = YearMonth.of(meseProssimo.getYear(), meseProssimo.getMonthValue());
+    ConcurrentHashMap<Integer, Visite> visiteMap = databaseUpdater.getVisiteMap();
+
+    // Ottieni i tipi di visita associati al volontario
+    List<String> tipiVisitaVolontario = volontario.getTipiDiVisite();
+
+    System.out.println("Calendario del mese di " + meseProssimo.getMonth() + " " + meseProssimo.getYear() + ":");
+System.out.println("Giorno\tGiorno della settimana");
+
+List<Integer> giorniDisponibili = new ArrayList<>();
+for (int giorno = 1; giorno <= ym.lengthOfMonth(); giorno++) {
+    LocalDate data = ym.atDay(giorno);
+    // Giorno della settimana in italiano
+    String giornoSettimana = data.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ITALIAN);
+
+    boolean visitaProgrammato = visiteMap.values().stream()
+        .anyMatch(v -> v.getData() != null && v.getData().equals(data));
+
+    boolean tipoVisitaConsentito = tipiVisitaVolontario.stream()
+        .anyMatch(tipo -> isTipoVisitaProgrammabileInGiorno(tipo, data.getDayOfWeek().toString()));
+
+    boolean disponibile = !visitaProgrammato && tipoVisitaConsentito;
+
+    if (disponibile) {
+        System.out.printf("%02d\t%s%n", giorno, giornoSettimana);
+        giorniDisponibili.add(giorno);
+    }
+}
+
+    if (giorniDisponibili.isEmpty()) {
+        System.out.println("Non ci sono giorni disponibili per dichiarare la disponibilità.");
+        return;
+    }
+
+    System.out.println("Inserisci le date (formato: DD) separate da virgola tra quelle disponibili:");
+    String input = InputDati.leggiStringaNonVuota("Date: ");
+    String[] dateArray = input.split(",");
+    List<String> dateDisponibili = new ArrayList<>();
+    for (String data : dateArray) {
+        String trimmed = data.trim();
+        try {
+            int giorno = Integer.parseInt(trimmed);
+            if (!giorniDisponibili.contains(giorno)) {
+                System.out.println("Il giorno " + trimmed + " non è disponibile.");
+                continue;
+            }
+            dateDisponibili.add(trimmed);
+        } catch (NumberFormatException e) {
+            System.out.println("Formato data non valido: " + trimmed);
+        }
+    }
+    disponibilitaVolontari.put(volontario.getEmail(), dateDisponibili);
+    System.out.println("Disponibilità salvata solo in memoria!");
+    System.out.println("Date salvate per " + volontario.getEmail() + ": " + dateDisponibili);
+}
+
+// Funzione di esempio: da personalizzare in base alla tua logica di associazione tipo-visita/giorno
+private boolean isTipoVisitaProgrammabileInGiorno(String tipoVisita, String giornoSettimana) {
+    // Esempio: tutte le visite sono programmabili tutti i giorni tranne DOMENICA
+    return !giornoSettimana.equals("SUNDAY");
+}
 
 }
 
